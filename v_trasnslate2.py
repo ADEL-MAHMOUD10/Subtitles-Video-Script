@@ -78,8 +78,8 @@ def translate():
     except FileNotFoundError as file_error:
         print("-" * 40)
         print(f"{file_error}")
-        print("Please enter the path of the file like this G:/Path/file_name.mp3")
-        print("If you do not know the path of files, please move the audio file to the same folder where the script runs.")
+        print("Please enter the path of the file like this G:/Path/file_name")
+        print("If you do not know the path of files, please move the file to the same folder where the script runs.")
         print("-" * 40)
     except TimeoutError as time_error:
         print(f"->{time_error}")
