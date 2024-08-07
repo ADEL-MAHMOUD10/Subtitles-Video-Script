@@ -10,8 +10,6 @@ SRT AI Generator leverages the power of AI to provide accurate and natural-sound
 
 Replace "2ba**********" with your AssemblyAI API key ( Get it from [here](https://www.assemblyai.com/app) )
 
-
-
 # Installation
 
 Install All Library by ```pip install library-name```  
@@ -27,3 +25,12 @@ Install All Library by ```pip install library-name```
 ```
 4- pip install moviepy
 ```
+# Getting Started
+Follow these simple steps to set up SRT AI Generator and start enjoying better translations:
+1- intall all library (in Installation)
+2- get your API and reblace it in headers = {
+     "authorization": " " add your API in here 
+}
+3- select video file to convert to mp3 file for easy uploading 
+4- wait for uploading
+5- srt file will downloaded
