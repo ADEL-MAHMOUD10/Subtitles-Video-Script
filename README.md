@@ -27,7 +27,7 @@ pip install moviepy
 ```
 # Getting Started
 Follow these simple steps to set up SRT AI Generator and start enjoying better translations:
-1. intall all library (in Installation)
+1. install all library (in Installation)
 2. get your API and reblace it in headers = {
      "authorization" : " " add your API in here 
 }
