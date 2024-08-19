@@ -99,4 +99,4 @@ def get_subtitle_file(transcript_id, file_format):
         raise RuntimeError(f"Failed to retrieve {file_format.upper()} file: {response.status_code} {response.reason}")
 
 # Call the translate function
-subtitles()
+subtitle()
