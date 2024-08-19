@@ -29,7 +29,7 @@ def video_to_audio():
     print("Successful conversion")
     
     return audio_file_name
-def translate():
+def subtitle():
     try:
         file_name = video_to_audio()
         if not file_name:
@@ -99,4 +99,4 @@ def get_subtitle_file(transcript_id, file_format):
         raise RuntimeError(f"Failed to retrieve {file_format.upper()} file: {response.status_code} {response.reason}")
 
 # Call the translate function
-translate()
+subtitles()
