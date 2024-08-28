@@ -116,5 +116,5 @@ def Transcription():
     except RuntimeError as r_error:
         print(f"->{r_error}")
 
-# Run the translate function
+# Run the Transcription function
 Transcription()
