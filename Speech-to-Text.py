@@ -5,7 +5,7 @@ import moviepy.editor
 
 def video_to_audio():
     print("_" * 26 + "CONVERT" + "_" * 26)
-    print("Select Video to convert it to Audio file for best translate")
+    print("Select Video to convert it to Audio file for best subtitle")
     video_name = filedialog.askopenfilename(
         title="Select Video",
         filetypes=[("Video Files", "*.mp4;*.wmv;*.mov;*.mkv;*.H.264")]
@@ -32,27 +32,15 @@ def video_to_audio():
     
     return audio_file_name
 
-def get_subtitle_file(transcript_id, file_format, headers):
-    if file_format not in ["srt", "vtt"]:
-        raise ValueError("Invalid file format. Valid formats are 'srt' and 'vtt'.")
 
-    url = f"https://api.assemblyai.com/v2/transcript/{transcript_id}/{file_format}"
-
-    response = requests.get(url, headers=headers)
-
-    if response.status_code == 200:
-        return response.text
-    else:
-        raise RuntimeError(f"Failed to retrieve {file_format.upper()} file: {response.status_code} {response.reason}")
-
-def translate():
+def Transcription():
     try:
         file_name = video_to_audio()
         if file_name is None:
             return
         
         base_url = "https://api.assemblyai.com/v2"
-        headers = {"authorization": ""} # add API key here
+        headers = {"authorization": ""} # add Your API key here
         print("Started....")
 
         with open(file_name, "rb") as f:
@@ -84,20 +72,35 @@ def translate():
                 print("Transcription in progress...")
                 time.sleep(10)
 
-        while True:
-            file_format = input("What file format do you need (srt/vtt): ").strip().lower()
-            if file_format in ["srt", "vtt"]:
-                subtitle_text = get_subtitle_file(transcript_id, file_format, headers)
-                subtitle_file = input(f"Enter the desired output file name (without extension): ").strip()
-                if not subtitle_file.lower().endswith(f'.{file_format}'):
-                    subtitle_file += f'.{file_format}'
-                
-                with open(subtitle_file, 'w') as f:
-                    f.write(subtitle_text)
-                print(f"{subtitle_file} Download successful")
-                break
+        def get_subtitle_file(transcript_id, file_format, headers):
+            if file_format not in ["srt", "vtt"]:
+                raise ValueError("Invalid file format. Valid formats are 'srt' and 'vtt'.")
+
+            url = f"https://api.assemblyai.com/v2/transcript/{transcript_id}/{file_format}"
+
+            response = requests.get(url, headers=headers)
+
+            if response.status_code == 200:
+                return response.text
             else:
-                print("Please enter file format srt or vtt!")
+                raise RuntimeError(f"Failed to retrieve {file_format.upper()} file: {response.status_code} {response.reason}")
+
+        def save_subtitle_file():
+            while True:
+                file_format = input("What file format do you need (srt/vtt): ").strip().lower()
+                if file_format in ["srt", "vtt"]:
+                    subtitle_text = get_subtitle_file(transcript_id, file_format, headers)
+                    subtitle_file = input(f"Enter the desired output file name (without extension): ").strip()
+                    if not subtitle_file.lower().endswith(f'.{file_format}'):
+                        subtitle_file += f'.{file_format}'
+                    
+                    with open(subtitle_file, 'w') as f:
+                        f.write(subtitle_text)
+                    print(f"{subtitle_file} Download successful")
+                    break
+                else:
+                    print("Please enter file format srt or vtt!")
+        save_subtitle_file()
     except FileNotFoundError as file_error:
         print("-" * 40)
         print(f"{file_error}")
@@ -105,11 +108,11 @@ def translate():
         print("If you do not know the path of the files, please move the audio file to the same folder where the script runs")
         print("-" * 40)
     except TimeoutError as time_error:
-        print(f"{time_error}")
+        print(f"->{time_error}")
     except ValueError as v_error:
-        print(f"{v_error}")
+        print(f"->{v_error}")
     except RuntimeError as r_error:
-        print(f"{r_error}")
+        print(f"->{r_error}")
 
 # Run the translate function
-translate()
+Transcription()
