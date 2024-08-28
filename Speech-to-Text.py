@@ -1,21 +1,22 @@
-# Install all library by pip install library in terminal 
-import requests # pip install requests
-import time # pip install time
-from tkinter import filedialog # pip install tk
-import moviepy.editor # pip install moviepy
-
+import requests
+import time
+from tkinter import filedialog
+import moviepy.editor
 
 def video_to_audio():
-    print("_"*23+"CONVERT"+"_"*23)
+    print("_" * 26 + "CONVERT" + "_" * 26)
     print("Select Video to convert it to Audio file for best translate")
-    video_name = filedialog.askopenfilename(title="Select Video", filetypes=[("Video Files", "*.mp4;*.wmv;*.mov;*.mkv;*.H.264")])
+    video_name = filedialog.askopenfilename(
+        title="Select Video",
+        filetypes=[("Video Files", "*.mp4;*.wmv;*.mov;*.mkv;*.H.264")]
+    )
     if not video_name:
         print("No file selected.")
         return None
 
     with open(video_name, "rb") as file:
         video_size = len(file.read())
-        print(f"File size: {(video_size) * 0.000001:.2f}MB")
+        print(f"Video size: {(video_size) * 0.000001:.2f}MB")
 
     video = moviepy.editor.VideoFileClip(video_name)
     print("Video uploaded...")
@@ -25,82 +26,90 @@ def video_to_audio():
 
     with open(audio_file_name, "rb") as f:
         audio_size = len(f.read())
-        print(f"File size: {(audio_size) * 0.000001:.2f}MB")
-    print(f"File name: {audio_file_name}")
+        print(f"Audio file size: {(audio_size) * 0.000001:.2f}MB")
+    print(f"Audio file name: {audio_file_name}")
     print("Successful conversion")
     
     return audio_file_name
+
+def get_subtitle_file(transcript_id, file_format, headers):
+    if file_format not in ["srt", "vtt"]:
+        raise ValueError("Invalid file format. Valid formats are 'srt' and 'vtt'.")
+
+    url = f"https://api.assemblyai.com/v2/transcript/{transcript_id}/{file_format}"
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        return response.text
+    else:
+        raise RuntimeError(f"Failed to retrieve {file_format.upper()} file: {response.status_code} {response.reason}")
+
 def translate():
     try:
         file_name = video_to_audio()
+        if file_name is None:
+            return
+        
         base_url = "https://api.assemblyai.com/v2"
-
-        headers = {
-            "authorization": "2ba819026c704d648dced28f3f52406f"
-        }
+        headers = {"authorization": ""} # add API key here
         print("Started....")
-        # open audio file to upload to assemblyai site
+
         with open(file_name, "rb") as f:
             calc_size = len(f.read())
-            print(f"file size: {(calc_size)*0.000001:.2f}Mb")
+            print(f"File size: {(calc_size) * 0.000001:.2f}MB")
+        
         print("Wait for uploading....")
         with open(file_name, "rb") as f:
-            response = requests.post(base_url + "/upload",
-                                headers=headers,
-                                data=f)
-            
+            response = requests.post(base_url + "/upload", headers=headers, data=f)
         
         upload_url = response.json()["upload_url"]
-        data = {
-            "audio_url": upload_url
-        }
-        url = base_url + "/transcript"
-        response = requests.post(url, json=data, headers=headers)
+        data = {"audio_url": upload_url}
+        response = requests.post(base_url + "/transcript", json=data, headers=headers)
         transcript_id = response.json()['id']
         polling_endpoint = f"https://api.assemblyai.com/v2/transcript/{transcript_id}"
-        print("successful uploading progress 75%....")
-        print("please wait for second...")
+        print("Successful uploading, progress 75%....")
+        print("Please wait a moment...")
+        
         while True:
             transcription_result = requests.get(polling_endpoint, headers=headers).json()
 
             if transcription_result['status'] == 'completed':
-                print("progress 95%")
+                print("Progress 95%")
+                print("Transcription completed")
                 break
-
             elif transcription_result['status'] == 'error':
                 raise RuntimeError(f"Transcription failed: {transcription_result['error']}")
-
             else:
-                time.sleep(3)
+                print("Transcription in progress...")
+                time.sleep(10)
 
-        def get_subtitle_file(transcript_id, file_format):
-            if file_format not in ["srt", "vtt"]:
-                raise ValueError("Invalid file format. Valid formats are 'srt' and 'vtt'.")
-
-            url = f"https://api.assemblyai.com/v2/transcript/{transcript_id}/{file_format}"
-
-            response = requests.get(url, headers=headers)
-
-            if response.status_code == 200:
-                return response.text
+        while True:
+            file_format = input("What file format do you need (srt/vtt): ").strip().lower()
+            if file_format in ["srt", "vtt"]:
+                subtitle_text = get_subtitle_file(transcript_id, file_format, headers)
+                subtitle_file = input(f"Enter the desired output file name (without extension): ").strip()
+                if not subtitle_file.lower().endswith(f'.{file_format}'):
+                    subtitle_file += f'.{file_format}'
+                
+                with open(subtitle_file, 'w') as f:
+                    f.write(subtitle_text)
+                print(f"{subtitle_file} Download successful")
+                break
             else:
-                raise RuntimeError(f"Failed to retrieve {file_format.upper()} file: {response.status_code} {response.reason}")
-        # subtitle_text = get_subtitle_file(transcript_id, "vtt")
-        subtitle_text = get_subtitle_file(transcript_id, 'srt')
-        subtitle_file = input("Enter the desired output file name: ")
-        w = open(subtitle_file,'a')
-        w.write(subtitle_text)
-        w.close()
-        print(f"{subtitle_file} Download successful")
-
+                print("Please enter file format srt or vtt!")
     except FileNotFoundError as file_error:
-        print("-"*40)
+        print("-" * 40)
         print(f"{file_error}")
-        print("please enter path of file like this G:/Path/file_name.mp3")
-        print("If you do not know the path of files\nplease move auido file in the same folder where the script runs")
-        print("-"*40)
+        print("Please enter the path of the file like this G:/Path/file_name.mp3")
+        print("If you do not know the path of the files, please move the audio file to the same folder where the script runs")
+        print("-" * 40)
     except TimeoutError as time_error:
-        print(f"->{time_error}")
+        print(f"{time_error}")
     except ValueError as v_error:
-        print(f"->{v_error}")
+        print(f"{v_error}")
+    except RuntimeError as r_error:
+        print(f"{r_error}")
+
+# Run the translate function
 translate()
