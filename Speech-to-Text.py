@@ -2,7 +2,7 @@ import requests
 import time
 from tkinter import filedialog
 import moviepy.editor
-
+from datetime import datetime
 def video_to_audio():
     print("_" * 26 + "CONVERT" + "_" * 26)
     print("Select Video to convert it to Audio file for best subtitle")
@@ -20,7 +20,8 @@ def video_to_audio():
 
     video = moviepy.editor.VideoFileClip(video_name)
     print("Video uploaded...")
-    audio_file_name = "audio.mp3"
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    audio_file_name = f"audio_{timestamp}.mp3"
     audio = video.audio
     audio.write_audiofile(audio_file_name)
 
@@ -86,6 +87,7 @@ def Transcription():
                 raise RuntimeError(f"Failed to retrieve {file_format.upper()} file: {response.status_code} {response.reason}")
 
         def save_subtitle_file():
+            # Loop until valid file format is provided
             while True:
                 file_format = input("What file format do you need (srt/vtt): ").strip().lower()
                 if file_format in ["srt", "vtt"]:
